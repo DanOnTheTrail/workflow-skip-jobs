@@ -17,11 +17,13 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       has_changes: ${{ steps.foo.outputs.has_changes }}
+    env:
+      has_changes: ${{ inputs.has_changes }}
     steps:
       - name: Arbitrary step
         id: foo
         run: |
-          if [ "${{ github.event.inputs.has_changes }}" == "true" ]; then
+          if [ "${{ env.has_changes }}" == "true" ]; then
             echo "Changes detected, running plan"
             echo "has_changes=true" >> $GITHUB_OUTPUT
           else

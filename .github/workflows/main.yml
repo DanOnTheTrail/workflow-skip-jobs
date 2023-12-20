@@ -4,7 +4,7 @@ on: pull_request
 
 jobs:
   plan-sandbox:
-    name: Plan
+    name: Plan Sandbox
     uses: ./.github/workflows/_plan.yml
     with:
         has_changes: false
@@ -16,10 +16,12 @@ jobs:
     needs: plan-sandbox
     steps:
         - name: Apply
-          run: echo "Apply"
+          run: |
+            echo "has changes: ${{ needs.plan-sandbox.outputs.has_changes }}"
+            echo "Apply"
 
   plan-dev:
-    name: Plan
+    name: Plan Dev
     if: (${{ needs.plan-sandbox.outputs.has_changes == 'true' }} && ${{ success()}}) || ${{ needs.plan-sandbox.outputs.has_changes == 'false' }}
     needs: [apply-sandbox, plan-sandbox]
     uses: ./.github/workflows/_plan.yml
@@ -33,10 +35,12 @@ jobs:
     needs: plan-dev
     steps:
         - name: Apply
-          run: echo "Apply"
+          run: |
+            echo "has changes: ${{ needs.plan-dev.outputs.has_changes }}"
+            echo "Apply"
 
   plan-prod:
-    name: Plan
+    name: Plan Prod
     if: (${{ needs.plan-dev.outputs.has_changes == 'true' }} && ${{ success()}}) || ${{ needs.plan-dev.outputs.has_changes == 'false' }}
     needs: [apply-dev, plan-dev]
     uses: ./.github/workflows/_plan.yml
@@ -50,4 +54,6 @@ jobs:
     needs: plan-prod
     steps:
         - name: Apply
-          run: echo "Apply"
+          run: |
+            echo "has changes: ${{ needs.plan-prod.outputs.has_changes }}"
+            echo "Apply"

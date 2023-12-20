@@ -1,0 +1,59 @@
+name: Main Pipeline
+
+on: pull_request
+
+jobs:
+  plan-sandbox:
+    name: Plan Sandbox
+    uses: ./.github/workflows/_plan.yml
+    with:
+        has_changes: false
+
+  apply-sandbox:
+    name: Apply Sandbox
+    if: ${{ needs.plan-sandbox.outputs.has_changes == 'true' }}
+    runs-on: ubuntu-22.04
+    needs: plan-sandbox
+    steps:
+        - name: Apply
+          run: |
+            echo "has changes: ${{ needs.plan-sandbox.outputs.has_changes }}"
+            echo "Apply"
+
+  plan-dev:
+    name: Plan Dev
+    if: (${{ needs.plan-sandbox.outputs.has_changes == 'true' }} && ${{ success()}}) || ${{ needs.plan-sandbox.outputs.has_changes == 'false' }}
+    needs: [apply-sandbox, plan-sandbox]
+    uses: ./.github/workflows/_plan.yml
+    with:
+        has_changes: true
+
+  apply-dev:
+    name: Apply Dev (${{ needs.plan-dev.outputs.has_changes }})
+    if: ${{ needs.plan-dev.outputs.has_changes == 'true' }} && ${{ success()}}
+    runs-on: ubuntu-22.04
+    needs: plan-dev
+    steps:
+        - name: Apply
+          run: |
+            echo "has changes: ${{ needs.plan-dev.outputs.has_changes }}"
+            echo "Apply"
+
+  plan-prod:
+    name: Plan Prod
+    if: (${{ needs.plan-dev.outputs.has_changes == 'true' }} && ${{ success()}}) || ${{ needs.plan-dev.outputs.has_changes == 'false' }}
+    needs: [apply-dev, plan-dev]
+    uses: ./.github/workflows/_plan.yml
+    with:
+        has_changes: true
+
+  apply-prod:
+    name: Apply Prod (${{ needs.plan-prod.outputs.has_changes }})
+    if: ${{ needs.plan-prod.outputs.has_changes == 'true' }} && ${{ success()}}
+    runs-on: ubuntu-22.04
+    needs: plan-prod
+    steps:
+        - name: Apply
+          run: |
+            echo "has changes: ${{ needs.plan-prod.outputs.has_changes }}"
+            echo "Apply"

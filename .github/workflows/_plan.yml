@@ -1,0 +1,30 @@
+name: Plan Workflow
+
+on:
+  workflow_call:
+    inputs:
+      has_changes:
+        description: If there are changes to apply
+        required: true
+        type: boolean
+    outputs:
+      has_changes: 
+        description: If there are changes to apply
+        value: ${{ jobs.plan.outputs.has_changes }}
+
+jobs:
+  plan:
+    runs-on: ubuntu-22.04
+    outputs:
+      has_changes: ${{ steps.foo.outputs.has_changes }}
+    steps:
+      - name: Arbitrary step
+        id: foo
+        run: |
+          if [ "${{ github.event.inputs.has_changes }}" == "true" ]; then
+            echo "Changes detected, running plan"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes detected, skipping plan"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi

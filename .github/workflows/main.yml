@@ -29,8 +29,8 @@ jobs:
         has_changes: true
 
   apply-dev:
-    name: Apply Dev
-    if: ${{ needs.plan-dev.outputs.has_changes == 'true' }}
+    name: Apply Dev (${{ needs.plan-dev.outputs.has_changes }})
+    if: ${{ needs.plan-dev.outputs.has_changes == 'true' }} && ${{ success()}}
     runs-on: ubuntu-22.04
     needs: plan-dev
     steps:
@@ -48,8 +48,8 @@ jobs:
         has_changes: true
 
   apply-prod:
-    name: Apply Prod
-    if: ${{ needs.plan-prod.outputs.has_changes == 'true' }}
+    name: Apply Prod (${{ needs.plan-prod.outputs.has_changes }})
+    if: ${{ needs.plan-prod.outputs.has_changes == 'true' }} && ${{ success()}}
     runs-on: ubuntu-22.04
     needs: plan-prod
     steps:
